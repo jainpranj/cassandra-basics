@@ -1,0 +1,110 @@
+package org.neshant.cassandra_app.cassandra_app;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+        
+        
+        Cluster cluster = null;
+        try {
+            cluster = Cluster.builder()                                                    // (1)
+                    .addContactPoint("127.0.0.1")
+                    .build();
+            Session session = cluster.connect();                                           // (2)
+
+            ResultSet rs = session.execute("select * from neshant_keyspace.user_profiles");    // (3)
+              for(Row element: rs.all()){
+            	  
+            	  System.out.println(element); 
+              }
+            
+              
+              readTagCSVFile(session);
+             
+              
+                                       // (4)
+        } finally {
+            if (cluster != null) cluster.close();                                          // (5)
+        }
+        
+    }
+    
+    
+    
+    public static void readTagCSVFile( Session session){
+
+    	
+ 
+   	ArrayList arrayList = new ArrayList();
+   	
+   	int count=0;
+//   	 String csvFile = "/home/neshant/nysedataset/10dataset/ml-10M100K/tags.dat";
+   	String csvFile = "/home/neshant/Downloads/BX-Book-Ratings.csv";
+       String line = "";
+       String cvsSplitBy = ";";
+       
+       
+
+       try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+
+    	   BatchStatement batchStatement = new BatchStatement(); 
+           while ((line = br.readLine()) != null) {
+   count++;
+   
+
+               String[] tags = line.split(cvsSplitBy);
+               
+               
+             
+//               batchStatement.add(new SimpleStatement
+//            		   ("INSERT INTO neshant_keyspace.user_profiles (User-ID , ISBN , Book-Rating )"
+//            		   		+ " VALUES"
+//            		   		+ " ('87867','neshant','sharma',1989)"));
+//               
+               
+               
+               PreparedStatement preparedStatement = 
+                       session.prepare("INSERT INTO neshant_keyspace.ratings"
+                       		+ " (user_id , isbn , book_rating) VALUES (?, ?, ?)"); 
+               BoundStatement boundStatement = new BoundStatement(preparedStatement); 
+               boundStatement.bind(tags[0].replaceAll("\"", ""),tags[1].replaceAll("\"", ""),tags[2].replaceAll("\"", "")); 
+               batchStatement.add(boundStatement);
+            
+               
+               
+//               System.out.println("all set and done");
+           
+               
+               if (count>1000){
+   
+            	   
+            	   count=0;
+            	   System.out.println("before"+batchStatement.size());
+            	   session.execute(batchStatement);
+           
+            	   
+            	   
+            	   batchStatement.clear();
+             	   System.out.println("After"+batchStatement.size());   	   
+
+            	   
+               }

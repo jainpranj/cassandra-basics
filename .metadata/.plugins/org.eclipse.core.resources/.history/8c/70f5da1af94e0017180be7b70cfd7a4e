@@ -1,0 +1,13 @@
+package assignment3.thriftapiusage;
+
+/**
+ * Hello world!
+ *
+ */
+public class ThriftAPIUsage 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+    }
+}

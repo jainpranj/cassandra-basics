@@ -1,0 +1,40 @@
+cassandra-cli
+========================
+A) CREATE KEYSPACE store with placement_strategy = 'org.apache.cassandra.locator.SimpleStrategy' and strategy_options = {replication_factor:2};
+
+update keyspace graduate with placement_strategy = 'org.apache.cassandra.locator.OldNetworkTopologyStrategy'   and strategy_options = [{replication_factor:1}];
+
+B) create keyspace graduate with placement_strategy = 'org.apache.cassandra.locator.NetworkTopologyStrategy' and strategy_options=[{DC1:2, DC2:2}];	
+
+update keyspace graduate with placement_strategy = 'org.apache.cassandra.locator.SimpleStrategy'and strategy_options = [{replication_factor:3}];
+
+  
+set users[person1][full_name] = 'Mimi Jane';
+set users[person1][birth_date] = 1983;
+set users[person1][state] = 'MA';
+  
+set users[person2][full_name] = 'Jacky Min';
+set users[person2][birth_date] = 1993;
+set users[person2][state] = 'NH';
+  
+
+CQL
+=================
+a) CREATE KEYSPACE part5  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 2 };
+ALTER KEYSPACE part5  WITH REPLICATION = { 'class' : 'SimpleStrategy',  'replication_factor' : 1  };
+
+
+
+b)CREATE KEYSPACE datastore WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 1 };
+
+ALTER KEYSPACE datastore WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3, 'dc2' : 2};
+OR
+ALTER KEYSPACE datastore WITH REPLICATION =  { 'class' : 'NetworkTopologyStrategy', 'datacenter1' : 3 };
+
+CREATE table users(
+email text primary key,
+name text,
+city text);
+)
+
+INSERT INTO users(email,name,city) values ('ng@gmail.com','prnajal','Cambrigde');
